@@ -9,12 +9,17 @@ import java.awt.Color;
 import java.io.FileWriter;
 import java.sql.*;
 import java.text.DecimalFormat;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import net.proteanit.sql.DbUtils;
 import org.json.simple.JSONObject;
+import org.json.simple.JSONValue;
 
 /**
  *
@@ -26,7 +31,6 @@ JSONObject obj ;
 Connection conn = null;
 PreparedStatement pst = null;
 ResultSet rs = null;
-private static FileWriter file;
 
     public homePanel() {
         initComponents();
@@ -604,6 +608,7 @@ private static FileWriter file;
             pst = conn.prepareStatement(sql);
             pst.setString(1,txtNo.getText());
             
+            
             if(txtName.getText().length()<20){
               pst.setString(2,txtName.getText()); 
             }else{
@@ -637,11 +642,13 @@ private static FileWriter file;
             }
             else {
                 JOptionPane.showMessageDialog(null,"Barcode length must be 0 or 13!");
+                pst.cancel();
                 
 
             }
             pst.execute();
             JOptionPane.showMessageDialog(null, "Inserted Succesfully");
+            txtNo.setText(null);txtName.setText(null);txtPrice.setText(null);txtVat.setText(null);txtBarcode.setText(null);
             
         }catch(Exception e){
             JOptionPane.showMessageDialog(null, e);
@@ -652,7 +659,7 @@ private static FileWriter file;
         
           
                     
-       txtNo.setText(null);txtName.setText(null);txtPrice.setText(null);txtVat.setText(null);txtBarcode.setText(null);
+       
     }//GEN-LAST:event_btnSaveActionPerformed
 
     private void btnUpdateActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnUpdateActionPerformed
@@ -748,8 +755,47 @@ private static FileWriter file;
         }
     }//GEN-LAST:event_btnSearchNameActionPerformed
 
+    
+    public String getSqliteToJSON(ResultSet rs,String keyName) {
+        Map json = new HashMap(); 
+        List list = new ArrayList();
+        if(rs!=null)
+        {
+            try {
+            ResultSetMetaData metaData = rs.getMetaData();
+            while(rs.next())
+            {
+                Map<String,Object> columnMap = new HashMap<String, Object>();
+                for(int columnIndex=1;columnIndex<=metaData.getColumnCount();columnIndex++)
+                {
+                    if(rs.getString(metaData.getColumnName(columnIndex))!=null)
+                        columnMap.put(metaData.getColumnLabel(columnIndex),     rs.getString(metaData.getColumnName(columnIndex)));
+                    else
+                        columnMap.put(metaData.getColumnLabel(columnIndex), "");
+                }
+                list.add(columnMap);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        json.put("Products", list);
+     }
+        return JSONValue.toJSONString(json);
+    }
+    
     private void jsonBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jsonBtnActionPerformed
 
+        try{
+            String sql = "select Id,Name,Price,Vat,Barcode from Products";
+            pst = conn.prepareStatement(sql);
+            rs = pst.executeQuery();
+        }catch(Exception e){
+            
+        }
+    
+     textAreaJson.setText(getSqliteToJSON(rs,"Products"));
+        
+        
     }//GEN-LAST:event_jsonBtnActionPerformed
 
     private void mouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_mouseClicked
