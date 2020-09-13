@@ -637,14 +637,12 @@ private static FileWriter file;
             }
             else {
                 JOptionPane.showMessageDialog(null,"Barcode length must be 0 or 13!");
-                pst.cancel();
+                
 
             }
             pst.execute();
-
-            
-
             JOptionPane.showMessageDialog(null, "Inserted Succesfully");
+            
         }catch(Exception e){
             JOptionPane.showMessageDialog(null, e);
         }
@@ -752,30 +750,6 @@ private static FileWriter file;
 
     private void jsonBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jsonBtnActionPerformed
 
-             
-
-            //saved in json object with every save    
-             obj.put("Id",txtNo.getText());
-             obj.put("Name",txtName.getText());
-             obj.put("Price",txtPrice.getText());
-             obj.put("Vat",txtVat.getText());
-             obj.put("Barcode",txtBarcode.getText());
-             
-        try {
- 
-            // Constructs a FileWriter given a file name, using the platform's default charset
-            file = new FileWriter("json.txt");
-            file.write(obj.toJSONString());
-
- 
-        } catch (Exception e) {
-            e.printStackTrace();
- 
-        }
-             
-        String a = obj.toString();
-        textAreaJson.setText(a);
-        
     }//GEN-LAST:event_jsonBtnActionPerformed
 
     private void mouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_mouseClicked
@@ -883,7 +857,7 @@ private static FileWriter file;
                 + "	Price DECIMAL(5,2) ,\n"
                 + "     Vat INTEGER,\n"
                 + "     Barcode VARCHAR(13),\n"
-                + "CHECK(Barcode is null or length(Barcode) = 13),\n"
+                + "CONSTRAINT CK_Barcode CHECK (length(Barcode) = 0 OR length(Barcode = 13)),\n"
                 + "CONSTRAINT CK_Vat CHECK(Vat IN ('0', '1', '8', '18')),\n"
                 + "CONSTRAINT CK_Id CHECK(Id BETWEEN 0 AND 10000),\n"
                 + "PRIMARY KEY(Id)\n"
